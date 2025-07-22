@@ -6,15 +6,19 @@ async function fetchMessageCounts(channel) {
     let total = 0;
     let lastId = null;
     let fetchOptions = { limit: 100 };
+    let members = await channel.guild.members.fetch();
+
+    console.log(members.map(m => m.id));
+    console.log(members.map(m => m.nickname));
 
     while (true) {
         if (lastId) fetchOptions.before = lastId;
         const fetched = await channel.messages.fetch(fetchOptions);
         if (fetched.size === 0) break;
-
         fetched.forEach(msg => {
             if (msg.author.bot) return;
-            const user = msg.author?.displayName || msg.author.username;
+            const user = msg.author.id; 
+            if (!members.get(user)) return;
             counts[user] = (counts[user] || 0) + 1;
             total++;
         });
@@ -22,7 +26,7 @@ async function fetchMessageCounts(channel) {
         lastId = fetched.last().id;
         if (fetched.size < 100) break;
     }
-    counts['\nTotal**'] = total;
+    counts['total'] = total;
     
     return counts;
 }

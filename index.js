@@ -8,6 +8,7 @@ const client = new Client({
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMembers
     ],
 });
 
@@ -26,13 +27,12 @@ client.login(process.env.DISCORD_TOKEN)
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
-    if (message.content.toLowerCase() === 'log') {
-        const msgLog = message.channel.messages.cache
-            .filter(msg => !msg.author.bot)
-        msgLog.forEach(msg => {
-            console.log(`${msg.author.username}: ${msg.content}`);
-            msg.member
-        });
+    if (message.content.toLowerCase() === 'aaa') {
+        const len = Math.floor(Math.random() * 300) + 1;
+        const isUpper = Math.random() < 0.5;
+        const aaa = (isUpper ? 'A' : 'a').repeat(len);
+        
+        message.channel.send(aaa);
     }
 });
 
