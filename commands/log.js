@@ -8,10 +8,13 @@ module.exports = {
     const channel = interaction.channel;
     const counts = await fetchMessageCounts(channel);
 
-    const result = Object.entries(counts)
-      .map(([user, count]) => `${user}: ${count}`)
+    const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1])
+    sorted.push(sorted.shift())
+    
+    const result = sorted.map(([user, count]) => `${user}: ${count}`)
       .join('\n');
-
-    await interaction.editReply(`Message counts:\n${result}`);
+    
+    
+    await interaction.editReply(`**Message counts:**\n${result}**`);
   },
 };
