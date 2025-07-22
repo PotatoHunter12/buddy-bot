@@ -14,7 +14,7 @@ async function fetchMessageCounts(channel) {
 
         fetched.forEach(msg => {
             if (msg.author.bot) return;
-            const user = msg.author.username;
+            const user = msg.author?.displayName || msg.author.username;
             counts[user] = (counts[user] || 0) + 1;
             total++;
         });
@@ -22,7 +22,7 @@ async function fetchMessageCounts(channel) {
         lastId = fetched.last().id;
         if (fetched.size < 100) break;
     }
-    counts['**Total'] = total;
+    counts['\nTotal**'] = total;
     
     return counts;
 }

@@ -31,6 +31,7 @@ client.on("messageCreate", async (message) => {
             .filter(msg => !msg.author.bot)
         msgLog.forEach(msg => {
             console.log(`${msg.author.username}: ${msg.content}`);
+            msg.member
         });
     }
 });
