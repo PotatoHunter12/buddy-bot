@@ -2,10 +2,12 @@ FROM node:20
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY package*.json .
 
 RUN npm install
 
 COPY . .
 
 COPY .env .env
+
+CMD ["npx", "nodemon", "--legacy-watch", "buddy-bot.js"]

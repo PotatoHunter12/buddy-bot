@@ -6,6 +6,3 @@ services:
     restart: always
     env_file:
       - .env
-    volumes:
-      - .:/app
-    command: npx nodemon --legacy-watch buddy-bot.js
