@@ -34,6 +34,10 @@ client.on("messageCreate", async (message) => {
         
         message.channel.send(aaa);
     }
+    if (message.author.id === '344080041501786115') {
+        const mockMessage = mock(message.content);
+        message.channel.send(mockMessage);
+    }
 });
 
 client.on('interactionCreate', async interaction => {
