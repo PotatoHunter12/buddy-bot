@@ -28,7 +28,7 @@ client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
 
     if (message.content.toLowerCase() === 'aaa') {
-        const a = Math.floor(Math.random() * 10000) < 1 ? "a":"b";
+        const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
         const len = Math.floor(Math.random() * 300) + 1;
         const isUpper = Math.random() < 0.5;
         const aaa = (isUpper ? a.toUpperCase() : a).repeat(len);
