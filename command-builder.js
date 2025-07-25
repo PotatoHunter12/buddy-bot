@@ -6,6 +6,10 @@ const commands = [
     .setName('log')
     .setDescription('Count messages per user in this channel')
     .toJSON(),
+  new SlashCommandBuilder()
+    .setName('log-weekly') 
+    .setDescription('Count messages per user in this channel this week')
+    .toJSON(),
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);

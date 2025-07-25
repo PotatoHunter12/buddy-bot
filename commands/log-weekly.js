@@ -1,10 +1,10 @@
-const fetchMessageCounts = require('../utils/fetchMessageCounts');
+const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const supabase = require('../utils/supabaseClient');
 
 module.exports = {
-  name: 'log',
-  description: 'Count messages per user in every channel on this server',
+  name: 'log-weekly',
+  description: 'Count messages per user in every channel on this server this week',
   async execute(interaction) {
     await interaction.reply('Counting messages, please wait...');
     const guild = interaction.guild;
@@ -13,14 +13,12 @@ module.exports = {
       && c.parentId !== '932752870820946000' // exclude arhiv
       && c.parentId !== '1007666543850692708' // exclude admin channels
     );
-
-    // 1398262894638010388
     const output_channel = guild.channels.cache.get("1398262894638010388")
     const result = [];
 
     for (const channel of channels.values()) {
       const t = Date.now();
-      const counts = await fetchMessageCounts(channel);
+      const counts = await fetchWeeklyCounts(channel);
 
       const rows = Object.entries(counts)
         .map(([userId, count]) => ({
@@ -33,7 +31,7 @@ module.exports = {
 
       if (rows.length > 0) {
         const { error } = await supabase
-          .from('user_counts')
+          .from('user_counts_week')
           .upsert(rows, { onConflict: ['guild_id', 'channel_id', 'user_id'] });
 
         if (error) {
@@ -45,7 +43,7 @@ module.exports = {
     }
 
     const { data, error } = await supabase
-      .from('user_counts')
+      .from('user_counts_week')
       .select('user_id, msg_count')
       .eq('guild_id', guild.id);
 
@@ -65,7 +63,7 @@ module.exports = {
       .map(([userId, count]) => `<@${userId}>: ${count}`);
 
     const embed = new EmbedBuilder()
-      .setTitle(`Total Message Counts in ${guild.name}`)
+      .setTitle(`This Week's Message Counts in ${guild.name}`)
       .setDescription(
         sorted.length > 0
           ? sorted.join('\n')
@@ -77,7 +75,7 @@ module.exports = {
     await output_channel.send({ content: null, embeds: [embed] });
 
     const { data: channelData, error: channelError } = await supabase
-    .from('user_counts')
+    .from('user_counts_week')
     .select('channel_id, msg_count')
     .eq('guild_id', guild.id);
 
@@ -99,7 +97,7 @@ module.exports = {
       .map(([channelId, count]) => `<#${channelId}>: ${count}`);
 
     const channelEmbed = new EmbedBuilder()
-      .setTitle(`Total Message Counts per Channel in ${guild.name}`)
+      .setTitle(`This Week's Activity per Channel in ${guild.name}`)
       .setDescription(
         sortedChannels.length > 0
           ? sortedChannels.join('\n')
@@ -113,12 +111,40 @@ module.exports = {
     // Calculate total number of messages in the server
     const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
 
-    const totalEmbed = new EmbedBuilder()
-      .setTitle(`Total Messages in ${guild.name}`)
-      .setDescription(`**${totalMessages}** messages in this server.`)
-      .setColor(0xFEE75C)
-      .setTimestamp();
+    // Get top 3 users
+    const topUsers = Object.entries(userTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([userId, count], idx) => {
+        const medal = ['🥇', '🥈', '🥉'][idx] || '';
+        return `${medal} <@${userId}>: ${count}`;
+    });
 
-    await output_channel.send({ content: null, embeds: [totalEmbed] });
+    // Get top 1 channel
+    const [topChannelId, topChannelCount] = Object.entries(channelTotals)
+    .sort((a, b) => b[1] - a[1])[0] || [null, null];
+
+    const summaryEmbed = new EmbedBuilder()
+    .setTitle(`This Week's Server Activity Summary`)
+    .addFields(
+    {
+        name: 'Top 3 Users',
+        value: topUsers.length > 0 ? topUsers.join('\n') : 'No active users this week.',
+        inline: false,
+    },
+    {
+        name: 'Most Active Channel',
+        value: topChannelId ? `<#${topChannelId}>: ${topChannelCount} messages` : 'No active channels this week.',
+        inline: false,
+    },
+    {
+        name: 'Total Messages',
+        value: `**${totalMessages}** messages this week.`,
+        inline: false,
+    })
+    .setColor(0x00B0F4)
+    .setTimestamp();
+
+    await output_channel.send({ content: null, embeds: [summaryEmbed] });
   },
 };
