@@ -3,8 +3,8 @@ const path = require('path');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 
-const welcomeChannelId = '508577166007730186';
-const goodbyeChannelId = '1009115321388515403';
+let welcomeChannelId = '508577166007730186';
+let goodbyeChannelId = '1009115321388515403';
 
 if (process.env.BETA == 1) {
   welcomeChannelId = '1049440127480496160';
@@ -33,9 +33,16 @@ client.login(process.env.DISCORD_TOKEN)
     .catch(err => console.error('Failed to login:', err));
 
 client.on('guildMemberAdd', async member => {
+    if (process.env.BETA == 1) return;
     const channel = member.guild.channels.cache.get(welcomeChannelId);
     if (channel) {
         channel.send(`Doeran, <@${member.id}> <:doeran:1009551654988816394>!`);
+    }
+    if (member.user.bot) {
+      await member.roles.add("625272581255069734"); // 2
+    } else {
+      await member.roles.add("893600466435448884"); // 4
+      await member.roles.add("920797106925600820"); // 8
     }
 });
 
@@ -72,6 +79,8 @@ client.on('interactionCreate', async interaction => {
 });
 
 client.on('guildMemberRemove', async member => {
+    if (process.env.BETA == 1) return;
+
     const channel = member.guild.channels.cache.get(goodbyeChannelId);
     if (!channel) return;
 

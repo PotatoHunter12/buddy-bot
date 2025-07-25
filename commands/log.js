@@ -8,7 +8,11 @@ module.exports = {
   async execute(interaction) {
     await interaction.reply('Counting messages, please wait...');
     const guild = interaction.guild;
-    const channels = guild.channels.cache.filter(c => c.type === ChannelType.GuildText);
+    const channels = guild.channels.cache.filter(
+      c => c.type === ChannelType.GuildText
+      && c.parentId !== '932752870820946000' // exclude arhiv
+      && c.parentId !== '1007666543850692708' // exclude admin channels
+    );
     const output_channel = guild.channels.cache.get("1398262894638010388")
     const result = [];
 
