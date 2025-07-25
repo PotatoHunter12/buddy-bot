@@ -3,11 +3,13 @@ const path = require('path');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
 require('dotenv').config();
 
-// const welcomeChannelId = '508577166007730186';
-// const goodbyeChannelId = '1009115321388515403';
+const welcomeChannelId = '508577166007730186';
+const goodbyeChannelId = '1009115321388515403';
 
-const welcomeChannelId = '1049440127480496160';
-const goodbyeChannelId = '1049440127480496160';
+if (process.env.BETA == 1) {
+  welcomeChannelId = '1049440127480496160';
+  goodbyeChannelId = '1049440127480496160';
+} 
 
 const client = new Client({
     intents: [
