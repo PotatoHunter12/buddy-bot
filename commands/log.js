@@ -61,7 +61,7 @@ module.exports = {
 
     const sorted = Object.entries(userTotals)
       .sort((a, b) => b[1] - a[1])
-      .map(([userId, count]) => `<@${userId}>: ${count}`);
+      .map(([userId, count],i) => `${i+1}. <@${userId}>: ${count}`);
 
     const embed = new EmbedBuilder()
       .setTitle(`Total Message Counts in ${guild.name}`)
@@ -95,7 +95,7 @@ module.exports = {
     // Sort and format
     const sortedChannels = Object.entries(channelTotals)
       .sort((a, b) => b[1] - a[1])
-      .map(([channelId, count]) => `<#${channelId}>: ${count}`);
+      .map(([channelId, count], i) => `${i + 1}. <#${channelId}>: ${count}`);
 
     const channelEmbed = new EmbedBuilder()
       .setTitle(`Total Message Counts per Channel in ${guild.name}`)
