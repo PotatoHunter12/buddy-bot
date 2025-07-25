@@ -26,6 +26,7 @@ client.login(process.env.DISCORD_TOKEN)
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
+    if (process.env.BETA) return; 
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
@@ -33,7 +34,7 @@ client.on("messageCreate", async (message) => {
         const isUpper = Math.random() < 0.5;
         const aaa = (isUpper ? a.toUpperCase() : a).repeat(len);
         
-        message.channel.send(aaa);
+        message.channel.send(aaa); 
     }
     // if (message.author.id === '344080041501786115') {
     //     const mockMessage = mock(message.content);

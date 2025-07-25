@@ -3,13 +3,9 @@ const { Collection } = require('discord.js');
 async function fetchMessageCounts(channel) {
     let counts = [] ;
     
-    let total = 0;
     let lastId = null;
     let fetchOptions = { limit: 100 };
     let members = await channel.guild.members.fetch();
-
-    console.log(members.map(m => m.id));
-    console.log(members.map(m => m.nickname));
 
     while (true) {
         if (lastId) fetchOptions.before = lastId;
@@ -20,13 +16,11 @@ async function fetchMessageCounts(channel) {
             const user = msg.author.id; 
             if (!members.get(user)) return;
             counts[user] = (counts[user] || 0) + 1;
-            total++;
         });
 
         lastId = fetched.last().id;
         if (fetched.size < 100) break;
     }
-    counts['total'] = total;
     
     return counts;
 }
