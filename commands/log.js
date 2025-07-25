@@ -9,7 +9,7 @@ module.exports = {
     await interaction.reply('Counting messages, please wait...');
     const guild = interaction.guild;
     const channels = guild.channels.cache.filter(c => c.type === ChannelType.GuildText);
-    const output_channel = guild.channels.cache.get("1049440127480496160")
+    const output_channel = guild.channels.cache.get("1398262894638010388")
     const result = [];
 
     for (const channel of channels.values()) {
