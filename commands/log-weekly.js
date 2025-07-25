@@ -13,8 +13,8 @@ module.exports = {
       && c.parentId !== '932752870820946000' // exclude arhiv
       && c.parentId !== '1007666543850692708' // exclude admin channels
     );
-    const output_channel = guild.channels.cache.get("1398262894638010388")
-    const result = [];
+    const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160";
+    const output_channel = guild.channels.cache.get(out_id);
 
     for (const channel of channels.values()) {
       const t = Date.now();
