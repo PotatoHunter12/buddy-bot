@@ -41,6 +41,29 @@ const commands = [
         .setDescription('Send reminder to DM (default: false)')
         .setRequired(false)
     ),
+  new SlashCommandBuilder()
+    .setName('reaction-roles')
+    .setDescription('Send a message with reaction roles')
+    .addStringOption(option =>
+      option.setName('message')
+        .setDescription('Message to display')
+        .setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName('emotes')
+        .setDescription('Comma-separated emote list (e.g. 😀,😎, ...)')
+        .setRequired(true)
+    )
+    .addStringOption(option =>
+      option.setName('roles')
+        .setDescription('Comma-separated role list (e.g. @role1, @role2, ...)')
+        .setRequired(true)
+    ),
+  new SlashCommandBuilder()
+    .setName('help')  
+    .setDescription('Show all commands and what they do')
+    .toJSON(),
+    
 ];
 
 const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);

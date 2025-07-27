@@ -13,6 +13,7 @@ if (process.env.BETA == 1) {
 
 const client = new Client({
     intents: [
+        GatewayIntentBits.GuildMessageReactions,
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMessages,
         GatewayIntentBits.MessageContent,
