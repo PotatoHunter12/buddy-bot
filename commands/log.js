@@ -63,7 +63,7 @@ module.exports = {
       .sort((a, b) => b[1] - a[1])
       .map(([userId, count],i) => `${i+1}. <@${userId}>: ${count}`);
 
-    const embed = new EmbedBuilder()
+    const userEmbed = new EmbedBuilder()
       .setTitle(`Total Message Counts in ${guild.name}`)
       .setDescription(
         sorted.length > 0
@@ -72,8 +72,6 @@ module.exports = {
       )
       .setColor(0x5865F2)
       .setTimestamp();
-
-    await output_channel.send({ content: null, embeds: [embed] });
 
     const { data: channelData, error: channelError } = await supabase
     .from('user_counts')
@@ -107,8 +105,6 @@ module.exports = {
       .setColor(0x57F287)
       .setTimestamp();
 
-    await output_channel.send({ content: null, embeds: [channelEmbed] });
-
     // Calculate total number of messages in the server
     const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
 
@@ -118,6 +114,12 @@ module.exports = {
       .setColor(0xFEE75C)
       .setTimestamp();
 
-    await output_channel.send({ content: null, embeds: [totalEmbed] });
+    const msg1 = await output_channel.messages.fetch(process.env.BETA == 1 ?"1402019754788782140":"1398278318465355797");
+    const msg2 = await output_channel.messages.fetch(process.env.BETA == 1 ?"1402019755807735912":"1398278320461971577");
+    const msg3 = await output_channel.messages.fetch(process.env.BETA == 1 ?"1402019757099847840":"1398278321669673031");
+
+    await msg1.edit({ embeds: [userEmbed] });
+    await msg2.edit({ embeds: [channelEmbed] });
+    await msg3.edit({ embeds: [totalEmbed] });
   },
 };
