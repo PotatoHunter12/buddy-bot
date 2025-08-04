@@ -1,6 +1,7 @@
 const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const supabase = require('../utils/supabaseClient');
+const QuickChart = require('quickchart-js');
 
 module.exports = {
   name: 'log-weekly',
@@ -13,12 +14,30 @@ module.exports = {
       && c.parentId !== '932752870820946000' // exclude arhiv
       && c.parentId !== '1007666543850692708' // exclude admin channels
     );
+
+    const { error: deleteError } = await supabase
+      .from('user_counts_week')
+      .delete()
+      .eq('guild_id', guild.id);
+
+    if (deleteError) {
+      console.error('Failed to clear user_counts_week table:', deleteError);
+      await interaction.editReply('Failed to clear previous data from database.');
+      return;
+    }
+
     const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160";
     const output_channel = guild.channels.cache.get(out_id);
 
+    const allDailyCounts = {};
+
     for (const channel of channels.values()) {
       const t = Date.now();
-      const counts = await fetchWeeklyCounts(channel);
+      const {counts, daily} = await fetchWeeklyCounts(channel);
+
+      for (const [day, count] of Object.entries(daily)) {
+        allDailyCounts[day] = (allDailyCounts[day] || 0) + count;
+      }
 
       const rows = Object.entries(counts)
         .map(([userId, count]) => ({
@@ -41,6 +60,11 @@ module.exports = {
         }
       }
     }
+
+    const sortedDays = Object.keys(allDailyCounts).sort();
+    const graphData = sortedDays.map(day => allDailyCounts[day]);
+    console.log(graphData);
+    
 
     const { data, error } = await supabase
       .from('user_counts_week')
@@ -146,5 +170,63 @@ module.exports = {
     .setTimestamp();
 
     await output_channel.send({ content: null, embeds: [summaryEmbed] });
+
+    // Prepare chart data
+    const chart = new QuickChart()
+      .setConfig({
+        type: 'bar',
+        data: { 
+          labels: ['Mon', 'Tue', 'Wed','Thu', 'Fri','Sat','Sun'], 
+          datasets: [{ 
+            backgroundColor: '#008cffff',
+            borderColor: '#008cffff', 
+            data: graphData, 
+          }] 
+        },
+        options: {
+          scales: {
+            xAxes: [{
+              ticks: {
+                fontColor: '#ffffff' // White x-axis labels
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.2)' // Semi-transparent white grid lines
+              }
+            }],
+            yAxes: [{
+              ticks: {
+                beginAtZero: true,
+                fontColor: '#ffffff' // White y-axis labels
+              },
+              grid: {
+                color: 'rgba(255, 255, 255, 0.2)' // Semi-transparent white grid lines
+              }
+            }]
+          },
+          title: {
+            display: true,
+            text: 'Daily Message Counts',
+            fontSize: 24,
+            fontColor: '#ffffff' // White title text
+          },
+          legend: {
+              display: false // Remove legend
+          },
+        }
+      })
+      .setWidth(800)
+      .setHeight(400)
+      .setBackgroundColor('#1a1a1a');
+    const chartUrl = await chart.getUrl();
+
+    // Send the chart image
+    const chartEmbed = new EmbedBuilder()
+      .setTitle(`Weekly Message Count Chart`)
+      .setImage(chartUrl)
+      .setColor(0x00B0F4)
+      .setTimestamp();
+
+    await output_channel.send({ content: null, embeds: [chartEmbed] });
+
   },
 };

@@ -1,5 +1,6 @@
 async function fetchWeeklyCounts(channel) {
     let counts = {};
+    let daily = {};
     let members = await channel.guild.members.fetch();
     const week = Date.now() - 604800000;
 
@@ -16,7 +17,11 @@ async function fetchWeeklyCounts(channel) {
                 if (msg.author.bot) continue;
                 const user = msg.author.id;
                 if (!members.get(user)) continue;
+
                 counts[user] = (counts[user] || 0) + 1;
+
+                const day = new Date(msg.createdTimestamp).toISOString().split('T')[0];
+                daily[day] = (daily[day] || 0) + 1;
             }
 
             lastId = fetched.last().id;
@@ -39,7 +44,10 @@ async function fetchWeeklyCounts(channel) {
         }
     }
 
-    return counts;
+    return {
+        counts,
+        daily,
+    };
 }
 
 module.exports = fetchWeeklyCounts;
