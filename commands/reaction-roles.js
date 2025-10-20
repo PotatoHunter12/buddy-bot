@@ -37,40 +37,30 @@ module.exports = {
       await sentMsg.react(emoji);
     }
 
-    // Store mapping for this message
-    const reactionRoleMap = {};
+    const mapping = {};
     emojis.forEach((emoji, i) => {
-        // Parse custom emote id
-        const match = emoji.match(/^<a?:\w+:(\d+)>$/);
-        reactionRoleMap[match ? match[1] : emoji] = roleIDs[i];
+      const match = emoji.match(/^<a?:\w+:(\d+)>$/);
+      const key = match ? `${emoji.split(':')[1].replace('>','')}` : emoji; // keep same canonical key
+      // better: use emoji.id or emoji.name stored as mapping keys (see manager's lookup)
+      if (match) {
+        // store by id-key "name:id"
+        const name = emoji.match(/^<a?:([^:>]+):/)[1];
+        mapping[`${name}:${match[1]}`] = roleIDs[i];
+      } else {
+        mapping[emoji] = roleIDs[i];
+      }
     });
 
-    // Reaction add
-    const onReactAdd = async (reaction, user) => {
-        console.log(`Reaction added: ${reaction.emoji.name} by ${user.tag}`);
-            
-        if (reaction.message.id !== sentMsg.id) return;
-        if (user.bot) return;
-        const roleId = reactionRoleMap[reaction.emoji.id] || reactionRoleMap[reaction.emoji.name];
-        if (!roleId) return;
-        const member = await reaction.message.guild.members.fetch(user.id);
-        await member.roles.add(roleId);
-    };
-
-    // Reaction remove
-    const onReactRemove = async (reaction, user) => {
-        console.log(`Reaction removed: ${reaction.emoji.name} by ${user.tag}`);
-        if (reaction.message.id !== sentMsg.id) return;
-        if (user.bot) return;
-        const roleId = reactionRoleMap[reaction.emoji.id] || reactionRoleMap[reaction.emoji.name];
-        if (!roleId) return;
-        const member = await reaction.message.guild.members.fetch(user.id);
-        await member.roles.remove(roleId);
-    };
-
-    const client = interaction.client;
-    client.on('messageReactionAdd', onReactAdd);
-    client.on('messageReactionRemove', onReactRemove);
-
+    // persist mapping and register it in memory via manager
+    if (interaction.client.reactionRoles) {
+      await interaction.client.reactionRoles.register(sentMsg.id, interaction.guild.id, interaction.channel.id, mapping);
+    } else {
+      // fallback: insert directly to DB if manager not initialized
+      const supabase = require('../utils/supabaseClient');
+      await supabase.from('reaction_roles').upsert([{ guild_id: interaction.guild.id, channel_id: interaction.channel.id, message_id: sentMsg.id, mapping }]);
+      // still set local map so runtime works until next restart
+      interaction.client.reactionRoleMap = interaction.client.reactionRoleMap || new Map();
+      interaction.client.reactionRoleMap.set(sentMsg.id, mapping);
+    }
   },
 };

@@ -1,7 +1,8 @@
 const fs = require('fs');
 const path = require('path');
 const cron = require('node-cron');
-const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, EmbedBuilder, Partials } = require('discord.js');
+const reactionRolesManager = require('./utils/reactionRolesManager');
 const { log } = require('console');
 const supabase = require('./utils/supabaseClient');
 require('dotenv').config();
@@ -10,13 +11,14 @@ const logChannelId = process.env.LOG_CHANNEL_ID;
 const logGuildId = process.env.LOG_GUILD_ID;
 
 const client = new Client({
-    intents: [
-        GatewayIntentBits.GuildMessageReactions,
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent,
-        GatewayIntentBits.GuildMembers
-    ],
+  intents: [
+      GatewayIntentBits.GuildMessageReactions,
+      GatewayIntentBits.Guilds,
+      GatewayIntentBits.GuildMessages,
+      GatewayIntentBits.MessageContent,
+      GatewayIntentBits.GuildMembers
+  ],
+  partials: [Partials.Message, Partials.Channel, Partials.Reaction, Partials.User],
 });
 
 let welcomeChannelId = '508577166007730186';
@@ -39,6 +41,9 @@ client.login(process.env.DISCORD_TOKEN)
     .then(() => console.log('Bot is online!'))
     .catch(err => console.error('Failed to login:', err));
 
+client.once('ready', async () => {
+    await reactionRolesManager.init(client);
+});
 
 client.on('guildMemberAdd', async member => {
     if (process.env.BETA == 1) return;
@@ -147,7 +152,7 @@ client.on('interactionCreate', async interaction => {
     logChannel.send(`Command \`${interaction.commandName}\` executed`);
   } catch (error) {
     console.error(error);
-    logChannel.send(error);
+    logChannel.send(error.message);
     await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
   }
 });
