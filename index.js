@@ -139,7 +139,7 @@ client.on('interactionCreate', async interaction => {
   const logGuild = client.guilds.cache.get(logGuildId);
   const logChannel = logGuild.channels.cache.get(logChannelId);
   const command = client.commands.get(interaction.commandName);
-  
+
   if (!command) return;
 
   try {
@@ -148,7 +148,7 @@ client.on('interactionCreate', async interaction => {
   } catch (error) {
     console.error(error);
     logChannel.send(error);
-    await interaction.channel.send({ content: 'There was an error executing that command!', ephemeral: true });
+    await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
   }
 });
 
