@@ -70,13 +70,13 @@ const commands = [
     
 ];
 
-const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN);
+const rest = new REST({ version: '10' }).setToken(process.env.DISCORD_TOKEN_MAIN);
 
 (async () => {
   try {
     console.log('Registering slash commands...');
     await rest.put(
-      Routes.applicationCommands(process.env.CLIENT_ID),
+      Routes.applicationCommands(process.env.CLIENT_ID_MAIN),
       { body: commands }
     );
     console.log('Slash commands registered!');

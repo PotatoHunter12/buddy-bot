@@ -6,13 +6,8 @@ const { log } = require('console');
 const supabase = require('./utils/supabaseClient');
 require('dotenv').config();
 
-let welcomeChannelId = '508577166007730186';
-let goodbyeChannelId = '1009115321388515403';
-
-if (process.env.BETA == 1) {
-  welcomeChannelId = '1049440127480496160';
-  goodbyeChannelId = '1049440127480496160';
-} 
+const logChannelId = process.env.LOG_CHANNEL_ID;
+const logGuildId = process.env.LOG_GUILD_ID;
 
 const client = new Client({
     intents: [
@@ -23,6 +18,14 @@ const client = new Client({
         GatewayIntentBits.GuildMembers
     ],
 });
+
+let welcomeChannelId = '508577166007730186';
+let goodbyeChannelId = '1009115321388515403';
+
+if (process.env.BETA == 1) {
+  welcomeChannelId = '1049440127480496160';
+  goodbyeChannelId = '1049440127480496160';
+} 
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -35,6 +38,7 @@ for (const file of commandFiles) {
 client.login(process.env.DISCORD_TOKEN)
     .then(() => console.log('Bot is online!'))
     .catch(err => console.error('Failed to login:', err));
+
 
 client.on('guildMemberAdd', async member => {
     if (process.env.BETA == 1) return;
@@ -96,13 +100,7 @@ cron.schedule('* * * * *', () => {
 });
 
 // cron.schedule('* * * * *', () => {
-//     const logChannelId = process.env.LOG_CHANNEL_ID;
-//     const logGuildId = process.env.LOG_GUILD_ID;
-
 //     const testCmd = client.commands.get('help');
-    
-//     const logGuild = client.guilds.cache.get(logGuildId);    
-//     const logChannel = logGuild.channels.cache.get(logChannelId);
     
 //     if (logChannel) {
 //         const fakeInteraction = {
@@ -138,13 +136,18 @@ client.on("messageCreate", async (message) => {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
+  const logGuild = client.guilds.cache.get(logGuildId);
+  const logChannel = logGuild.channels.cache.get(logChannelId);
   const command = client.commands.get(interaction.commandName);
+  
   if (!command) return;
 
   try {
     await command.execute(interaction);
+    logChannel.send(`Command \`${interaction.commandName}\` executed`);
   } catch (error) {
     console.error(error);
+    logChannel.send(error);
     await interaction.channel.send({ content: 'There was an error executing that command!', ephemeral: true });
   }
 });
