@@ -1,6 +1,9 @@
 const fs = require('fs');
 const path = require('path');
+const cron = require('node-cron');
 const { Client, Collection, GatewayIntentBits, EmbedBuilder } = require('discord.js');
+const { log } = require('console');
+const supabase = require('./utils/supabaseClient');
 require('dotenv').config();
 
 let welcomeChannelId = '508577166007730186';
@@ -40,12 +43,79 @@ client.on('guildMemberAdd', async member => {
         channel.send(`Doeran, <@${member.id}> <:doeran:1009551654988816394>!`);
     }
     if (member.user.bot) {
-      await member.roles.add("625272581255069734"); // 2
+      await member.roles.add("1005816223784783885"); // 2
     } else {
-      await member.roles.add("893600466435448884"); // 4
       await member.roles.add("920797106925600820"); // 8
     }
 });
+
+cron.schedule('0 0 * * 0', () => {
+    console.log('Running weekly tasks...');
+    const weeklyLogCommand = client.commands.get('log-weekly');
+    if (weeklyLogCommand) {
+        const fakeInteraction = {
+            channel: null,
+            reply: async (content) => {
+                console.log('Weekly log executed');
+            }
+        };
+        weeklyLogCommand.execute(fakeInteraction);
+    }
+}, { timezone: 'CET' });
+
+cron.schedule('0 0 * * 3', () => {
+  supabase.from('user_counts').select('*').limit(1).then(() => {
+    console.log('Pinged db to keep it awake');
+  });
+}, { timezone: 'CET' });
+
+cron.schedule('* * * * *', () => {
+  supabase.from('locked_admins').select('*').then(({ data, error }) => {
+    if (error) {
+      console.error('Error fetching locked admins:', error);
+      return;
+    }
+
+    data.forEach(async (entry) => {
+      const { user_id, guild_id, created_at } = entry;
+      const lockedDuration = Date.now() - new Date(created_at).getTime();
+
+      if (lockedDuration > 45 * 60 * 1000) {
+        // Restore roles
+        const member = await client.guilds.cache.get(guild_id).members.fetch(user_id);
+        if (member) {
+          await member.roles.remove(process.env.TEMP_ROLE_ID);
+          await member.roles.add(process.env.RM_ROLE_ID);
+        }
+
+        // Remove from locked_admins
+        await supabase.from('locked_admins').delete().eq('id', entry.id);
+      }
+    });
+  });
+});
+
+// cron.schedule('* * * * *', () => {
+//     const logChannelId = process.env.LOG_CHANNEL_ID;
+//     const logGuildId = process.env.LOG_GUILD_ID;
+
+//     const testCmd = client.commands.get('help');
+    
+//     const logGuild = client.guilds.cache.get(logGuildId);    
+//     const logChannel = logGuild.channels.cache.get(logChannelId);
+    
+//     if (logChannel) {
+//         const fakeInteraction = {
+//             channel: logChannel,
+//             reply: async (content) => {
+//                 logChannel.send(content);
+//                 console.log("test command executed");
+                
+//             }
+//         };
+//         testCmd.execute(fakeInteraction);
+//     }
+// });
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;

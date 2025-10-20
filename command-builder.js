@@ -63,6 +63,10 @@ const commands = [
     .setName('help')  
     .setDescription('Show all commands and what they do')
     .toJSON(),
+  new SlashCommandBuilder()
+    .setName('diploma')
+    .setDescription('Lock in fr')
+    .toJSON()
     
 ];
 
