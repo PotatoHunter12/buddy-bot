@@ -29,6 +29,8 @@ if (process.env.BETA == 1) {
   goodbyeChannelId = '1049440127480496160';
 } 
 
+let logChannel;
+
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
 
@@ -43,6 +45,12 @@ client.login(process.env.DISCORD_TOKEN)
 
 client.once('ready', async () => {
     await reactionRolesManager.init(client);
+
+    const logGuild = client.guilds.cache.get(logGuildId);
+    logChannel = logGuild.channels.cache.get(logChannelId);
+    
+    logChannel.send('Buddy Bot is online!');
+
 });
 
 client.on('guildMemberAdd', async member => {
@@ -141,10 +149,7 @@ client.on("messageCreate", async (message) => {
 client.on('interactionCreate', async interaction => {
   if (!interaction.isChatInputCommand()) return;
 
-  const logGuild = client.guilds.cache.get(logGuildId);
-  const logChannel = logGuild.channels.cache.get(logChannelId);
   const command = client.commands.get(interaction.commandName);
-
   if (!command) return;
 
   try {

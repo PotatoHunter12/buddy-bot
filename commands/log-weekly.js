@@ -2,6 +2,7 @@ const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const supabase = require('../utils/supabaseClient');
 const QuickChart = require('quickchart-js');
+let threadsg;
 
 async function createChartEmbed(graphData){
     const chart = new QuickChart()
@@ -59,7 +60,7 @@ async function createChartEmbed(graphData){
       .setTimestamp();
 
 }
-async function createSumEmbed(userTotals, channelTotals) {
+async function createSumEmbedOld(userTotals, channelTotals) {
     const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
 
     // Get top 3 users
@@ -73,7 +74,7 @@ async function createSumEmbed(userTotals, channelTotals) {
 
     // Get top 1 channel
     const [topChannelId, topChannelCount] = Object.entries(channelTotals)
-    .sort((a, b) => b[1] - a[1])[0] || [null, null];
+      .sort((a, b) => b[1] - a[1])[0] || [null, null];
 
   return new EmbedBuilder()
     .setTitle(`This Week's Server Activity Summary`)
@@ -81,6 +82,57 @@ async function createSumEmbed(userTotals, channelTotals) {
     {
         name: 'Top 3 Users',
         value: topUsers.length > 0 ? topUsers.join('\n') : 'No active users this week.',
+        inline: false,
+    },
+    {
+        name: 'Most Active Channel',
+        value: topChannelId ? `<#${topChannelId}>: ${topChannelCount} messages` : 'No active channels this week.',
+        inline: false,
+    },
+    {
+        name: 'Total Messages',
+        value: `**${totalMessages}** messages this week.`,
+        inline: false,
+    })
+    .setColor(0x00B0F4)
+    .setTimestamp();
+}
+async function createSummaryEmbed(userTotals, channelTotals, urgTotals, urrTotals) {
+  const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
+
+  // Get top 3 users
+  const topUsers = Object.entries(userTotals)
+  .sort((a, b) => b[1] - a[1])
+  .slice(0, 3)
+  .map(([userId, count], idx) => {
+      const medal = ['🥇', '🥈', '🥉'][idx] || '';
+      return `${medal} <@${userId}>: ${count}`;
+  });
+
+  const [topReacter, reacterCount] = Object.entries(urgTotals).sort((a, b) => b[1] - a[1])[0] || [null, null];
+  const [topReacted, reactedCount] = Object.entries(urrTotals).sort((a, b) => b[1] - a[1])[0] || [null, null];
+  
+
+  // Get top 1 channel
+  const [topChannelId, topChannelCount] = Object.entries(channelTotals)
+  .sort((a, b) => b[1] - a[1])[0] || [null, null];
+
+  return new EmbedBuilder()
+    .setTitle(`This Week's Server Activity Summary`)
+    .addFields(
+    {
+        name: 'Top 3 Users',
+        value: topUsers.length > 0 ? topUsers.join('\n') : 'No active users this week.',
+        inline: false,
+    },
+    {
+        name: 'Top Reacter',
+        value: topReacter ? `<@${topReacter}>: ${reacterCount} reactions` : 'No reactions given this week.',
+        inline: false,
+    },
+    {
+        name: 'Top Reacted',
+        value: topReacted ? `<@${topReacted}>: ${reactedCount} reactions` : 'No reactions received this week.',
         inline: false,
     },
     {
@@ -147,10 +199,24 @@ async function recount(guild, interaction) {
 
   for (const channel of channels.values()) {
     const t = Date.now();
-    const {counts, daily} = await fetchWeeklyCounts(channel);
+    const {
+      counts, 
+      daily, 
+      reactionTotals, 
+      reactionGiven, 
+      reactionReceived,
+      threads
+    } = await fetchWeeklyCounts(channel);
+
+    threadsg = {...threadsg, ...threads};
+    console.log(threadsg);
 
     for (const [day, count] of Object.entries(daily)) {
       allDailyCounts[day] = (allDailyCounts[day] || 0) + count;
+    }
+
+    for (const user of Object.keys(reactionGiven)) {
+      if (!counts[user]) counts[user] = 0;
     }
 
     const rows = Object.entries(counts)
@@ -159,6 +225,8 @@ async function recount(guild, interaction) {
         channel_id: channel.id,
         user_id: userId,
         msg_count: count,
+        react_given: reactionGiven[userId] || 0,
+        react_received: reactionReceived[userId] || 0,
         updated_at: new Date().toISOString(),
       }));
 
@@ -195,7 +263,7 @@ module.exports = {
 
     const { data, error } = await supabase
       .from('user_counts_week')
-      .select('user_id, channel_id, msg_count')
+      .select('user_id, channel_id, msg_count, react_given, react_received')
       .eq('guild_id', guild.id);
     if (error) {
       console.error('Supabase fetch error:', error);
@@ -204,19 +272,26 @@ module.exports = {
     }
 
     const userTotals = {};
+    const urgTotal = {};
+    const urrTotal = {};
     const channelTotals = {};
     
     for (const row of data) {
       userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
+      urgTotal[row.user_id] = (urgTotal[row.user_id] || 0) + row.react_given;
+      urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
+
       channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
     }
 
     const userEmbed = await createUserEmbed(userTotals, guild);
+    const reactionEmbed = await createUserEmbed(urgTotal, guild);
     const channelEmbed = await createChannelEmbed(channelTotals, guild);
-    const summaryEmbed = await createSumEmbed(userTotals, channelTotals);
+    const summaryEmbed = await createSumEmbedOld(userTotals, channelTotals);
     const chartEmbed = await createChartEmbed(graphData);
 
     await output_channel.send({ content: null, embeds: [userEmbed] });
+    await output_channel.send({ content: null, embeds: [reactionEmbed] });
     await output_channel.send({ content: null, embeds: [channelEmbed] });
     await output_channel.send({ content: null, embeds: [summaryEmbed] });
     await output_channel.send({ content: null, embeds: [chartEmbed] });

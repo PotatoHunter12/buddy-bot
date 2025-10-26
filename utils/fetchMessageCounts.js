@@ -1,4 +1,4 @@
-async function fetchWeeklyCounts(channel) {
+async function fetchMessageCounts(channel) {
     let counts = {};
     let members = await channel.guild.members.fetch();
 
@@ -44,4 +44,4 @@ async function fetchWeeklyCounts(channel) {
     return counts;
 }
 
-module.exports = fetchWeeklyCounts;
+module.exports = fetchMessageCounts;
