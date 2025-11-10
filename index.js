@@ -44,6 +44,15 @@ client.login(process.env.DISCORD_TOKEN)
     .catch(err => console.error('Failed to login:', err));
 
 client.once('ready', async () => {
+    for (const guild of client.guilds.cache.values()) {
+      try {
+        await guild.members.fetch();
+        console.log(`Cached members for ${guild.name}`);
+      } catch (err) {
+        console.warn(`Failed to cache members for ${guild.name}:`, err.message);
+      }
+    }
+
     await reactionRolesManager.init(client);
 
     const logGuild = client.guilds.cache.get(logGuildId);

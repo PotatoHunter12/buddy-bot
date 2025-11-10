@@ -1,4 +1,4 @@
-const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts');
+const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts'); 
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const supabase = require('../utils/supabaseClient');
 const QuickChart = require('quickchart-js');
@@ -60,7 +60,7 @@ async function createChartEmbed(graphData){
       .setTimestamp();
 
 }
-async function createSumEmbedOld(userTotals, channelTotals) {
+async function createSummaryEmbed(userTotals, channelTotals) {
     const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
 
     // Get top 3 users
@@ -97,53 +97,42 @@ async function createSumEmbedOld(userTotals, channelTotals) {
     .setColor(0x00B0F4)
     .setTimestamp();
 }
-async function createSummaryEmbed(userTotals, channelTotals, urgTotals, urrTotals) {
-  const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
-
-  // Get top 3 users
-  const topUsers = Object.entries(userTotals)
-  .sort((a, b) => b[1] - a[1])
-  .slice(0, 3)
-  .map(([userId, count], idx) => {
+async function createReactEmbed(urgTotals, urrTotals) {
+  const topReacter = Object.entries(urgTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([userId, count], idx) => {
       const medal = ['🥇', '🥈', '🥉'][idx] || '';
       return `${medal} <@${userId}>: ${count}`;
-  });
+    });
 
-  const [topReacter, reacterCount] = Object.entries(urgTotals).sort((a, b) => b[1] - a[1])[0] || [null, null];
-  const [topReacted, reactedCount] = Object.entries(urrTotals).sort((a, b) => b[1] - a[1])[0] || [null, null];
-  
+  const topReacted = Object.entries(urrTotals)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([userId, count], idx) => {
+      const medal = ['🥇', '🥈', '🥉'][idx] || '';
+      return `${medal} <@${userId}>: ${count}`;
+    });
 
-  // Get top 1 channel
-  const [topChannelId, topChannelCount] = Object.entries(channelTotals)
-  .sort((a, b) => b[1] - a[1])[0] || [null, null];
+  const totalReacts = Object.values(urgTotals).reduce((sum, count) => sum + count, 0);
 
   return new EmbedBuilder()
-    .setTitle(`This Week's Server Activity Summary`)
+    .setTitle(`This Week's Server Reactions Summary`)
     .addFields(
     {
-        name: 'Top 3 Users',
-        value: topUsers.length > 0 ? topUsers.join('\n') : 'No active users this week.',
+        name: 'Top 3 Most Reactive Users',
+        value: topReacter.length > 0 ? topReacter.join('\n') : 'No active users this week.',
         inline: false,
     },
     {
-        name: 'Top Reacter',
-        value: topReacter ? `<@${topReacter}>: ${reacterCount} reactions` : 'No reactions given this week.',
+        name: 'Top 3 Most Reacted Users',
+        value: topReacted.length > 0 ? topReacted.join('\n') : 'No reactions given this week.',
         inline: false,
     },
     {
-        name: 'Top Reacted',
-        value: topReacted ? `<@${topReacted}>: ${reactedCount} reactions` : 'No reactions received this week.',
-        inline: false,
-    },
-    {
-        name: 'Most Active Channel',
-        value: topChannelId ? `<#${topChannelId}>: ${topChannelCount} messages` : 'No active channels this week.',
-        inline: false,
-    },
-    {
-        name: 'Total Messages',
-        value: `**${totalMessages}** messages this week.`,
-        inline: false,
+      name: 'Total Reactions',
+      value: `**${totalReacts}** reactions this week.`,
+      inline: false,
     })
     .setColor(0x00B0F4)
     .setTimestamp();
@@ -285,15 +274,15 @@ module.exports = {
     }
 
     const userEmbed = await createUserEmbed(userTotals, guild);
-    const reactionEmbed = await createUserEmbed(urgTotal, guild);
     const channelEmbed = await createChannelEmbed(channelTotals, guild);
-    const summaryEmbed = await createSumEmbedOld(userTotals, channelTotals);
+    const summaryEmbed = await createSummaryEmbed(userTotals, channelTotals);
+    const reactEmbed = await createReactEmbed(urgTotal, urrTotal);
     const chartEmbed = await createChartEmbed(graphData);
 
     await output_channel.send({ content: null, embeds: [userEmbed] });
-    await output_channel.send({ content: null, embeds: [reactionEmbed] });
     await output_channel.send({ content: null, embeds: [channelEmbed] });
     await output_channel.send({ content: null, embeds: [summaryEmbed] });
+    await output_channel.send({ content: null, embeds: [reactEmbed] });
     await output_channel.send({ content: null, embeds: [chartEmbed] });
 
   },

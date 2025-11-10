@@ -2,12 +2,18 @@ async function fetchWeeklyCounts(channel) {
     let counts = {};
     let daily = {};
     let threads = {};
+    let members;
 
     let reactionTotals = {};     
     let reactionGiven = {};      
     let reactionReceived = {}; 
 
-    const members = await channel.guild.members.fetch();
+    try {
+    members = await channel.guild.members.fetch({ limit: 100 });
+    } catch (err) {
+        console.error(`Failed to fetch members for ${channel.guild.name}:`, err);
+        return { counts: {}, daily: {}, /* ... */ };
+    }
     const week = Date.now() - 604800000;
 
     async function countMessages(messageManager) {
