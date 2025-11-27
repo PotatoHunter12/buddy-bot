@@ -48,7 +48,7 @@ module.exports = {
                     await msg.delete();
                     deleted++;
                 } catch (err) {
-                    console.error('Failed to delete message:', err);
+                    console.log('Failed to delete message:', err);
                 }
             }
         } else {
@@ -58,7 +58,7 @@ module.exports = {
                     const deletedMessages = await channel.bulkDelete(batch, true);
                     deleted += deletedMessages.size;
                 } catch (err) {
-                    console.error('Failed to delete message:', err);
+                    console.log('Failed to delete message:', err);
                 }
             }
         }

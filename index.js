@@ -29,7 +29,13 @@ if (process.env.BETA == 1) {
   goodbyeChannelId = '1049440127480496160';
 } 
 
-let logChannel;
+const originalLog = console.log;
+console.log = (...data) => {
+    originalLog(...data); // still log to terminal
+
+    const channel = client.channels.cache.get(process.env.LOG_CHANNEL_ID);
+    if (channel) channel.send(data.join(" ")).catch(err => originalLog("Log send error:", err));
+};
 
 client.commands = new Collection();
 const commandFiles = fs.readdirSync('./commands').filter(file => file.endsWith('.js'));
@@ -40,7 +46,7 @@ for (const file of commandFiles) {
 }
 
 client.login(process.env.DISCORD_TOKEN)
-    .then(() => console.log('Bot is online!'))
+    .then(() => console.log('Buddy Bot is online!'))
     .catch(err => console.error('Failed to login:', err));
 
 client.once('ready', async () => {
@@ -54,12 +60,6 @@ client.once('ready', async () => {
     }
 
     await reactionRolesManager.init(client);
-
-    const logGuild = client.guilds.cache.get(logGuildId);
-    logChannel = logGuild.channels.cache.get(logChannelId);
-    
-    logChannel.send('Buddy Bot is online!');
-
 });
 
 client.on('guildMemberAdd', async member => {
@@ -163,10 +163,9 @@ client.on('interactionCreate', async interaction => {
 
   try {
     await command.execute(interaction);
-    logChannel.send(`Command \`${interaction.commandName}\` executed`);
+    console.log(`Command \`${interaction.commandName}\` executed`);
   } catch (error) {
-    console.error(error);
-    logChannel.send(error.message);
+    console.log(error);
     await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
   }
 });
@@ -204,7 +203,7 @@ client.on('guildMemberRemove', async member => {
             }
         }
     } catch (err) {
-        console.error('Error fetching audit logs for kick detection:', err);
+        console.log('Error fetching audit logs for kick detection:', err);
     }
 
     const embed = new EmbedBuilder()

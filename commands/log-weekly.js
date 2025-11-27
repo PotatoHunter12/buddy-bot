@@ -174,7 +174,7 @@ async function recount(guild, interaction) {
     .eq('guild_id', guild.id);
 
   if (deleteError) {
-    console.error('Failed to clear user_counts_week table:', deleteError);
+    console.log('Failed to clear user_counts_week table:', deleteError);
     await interaction.editReply('Failed to clear previous data from database.');
     return;
   }
@@ -198,7 +198,6 @@ async function recount(guild, interaction) {
     } = await fetchWeeklyCounts(channel);
 
     threadsg = {...threadsg, ...threads};
-    console.log(threadsg);
 
     for (const [day, count] of Object.entries(daily)) {
       allDailyCounts[day] = (allDailyCounts[day] || 0) + count;
@@ -225,7 +224,7 @@ async function recount(guild, interaction) {
         .upsert(rows, { onConflict: ['guild_id', 'channel_id', 'user_id'] });
 
       if (error) {
-        console.error(`Supabase error for #${channel.name}:`, error);
+        console.log(`Supabase error for #${channel.name}:`, error);
       } else {
         console.log(`Log command executed in ${guild.name} for channel #${channel.name}: ` + (Date.now() - t) + "ms");
       }
@@ -255,7 +254,7 @@ module.exports = {
       .select('user_id, channel_id, msg_count, react_given, react_received')
       .eq('guild_id', guild.id);
     if (error) {
-      console.error('Supabase fetch error:', error);
+      console.log('Supabase fetch error:', error);
       await interaction.editReply('Failed to fetch message counts from the database.');
       return;
     }
