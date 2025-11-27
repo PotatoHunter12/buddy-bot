@@ -98,7 +98,7 @@ cron.schedule('0 0 * * 3', () => {
 cron.schedule('* * * * *', () => {
   supabase.from('locked_admins').select('*').then(({ data, error }) => {
     if (error) {
-      console.error('Error fetching locked admins:', error);
+      console.log('Error fetching locked admins:', error);
       return;
     }
 
