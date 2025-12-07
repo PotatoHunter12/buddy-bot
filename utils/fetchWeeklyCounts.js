@@ -79,9 +79,7 @@ async function fetchWeeklyCounts(channel) {
             const threadCount = await countMessages(thread.messages);
             const starter = await thread.fetchStarterMessage()
             threads[thread.id] = { user: starter.author.id, count: threadCount };
-        } 
-        console.log(threads);
-               
+        }   
     }
 
     return { 

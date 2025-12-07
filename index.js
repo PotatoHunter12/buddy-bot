@@ -48,8 +48,9 @@ for (const file of commandFiles) {
 client.login(process.env.DISCORD_TOKEN)
     .then(() => console.log('Buddy Bot is online!'))
     .catch(err => console.error('Failed to login:', err));
-
+ 
 client.once('ready', async () => {
+    console.log(`Bot is ready in ${client.guilds.cache.size} guilds.`);
     for (const guild of client.guilds.cache.values()) {
       try {
         await guild.members.fetch();
