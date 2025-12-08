@@ -24,7 +24,7 @@ async function fetchWeeklyCounts(channel) {
             if (lastId) fetchOptions.before = lastId;
             const fetched = await messageManager.fetch(fetchOptions);
             if (fetched.size === 0) break;
-
+ 
             for (const msg of fetched.values()) {
                 if (msg.createdTimestamp < week) return curCount-1;
                 if (msg.author.bot) continue;
@@ -77,7 +77,17 @@ async function fetchWeeklyCounts(channel) {
         const activeThreads = await channel.threads.fetchActive();
         for (const thread of activeThreads.threads.values()) {
             const threadCount = await countMessages(thread.messages);
-            const starter = await thread.fetchStarterMessage()
+            let starter;
+            try {
+                starter = await thread.fetchStarterMessage()
+                console.log("Log command executed in thread:",thread.name);
+                
+            } catch (error) {
+                console.log("Failed to fetch starter message for thread:", thread.name);
+                continue;
+            }
+            
+            
             threads[thread.id] = { user: starter.author.id, count: threadCount };
         }   
     }

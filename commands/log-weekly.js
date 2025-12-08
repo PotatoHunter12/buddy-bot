@@ -244,7 +244,7 @@ module.exports = {
     await interaction.reply({content: 'Counting messages, please wait...', ephemeral: true});
     const guild = interaction.guild;
 
-    const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160";
+    const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160"; // 1049440127480496160
     const output_channel = guild.channels.cache.get(out_id);
 
     const graphData = await recount(guild, interaction);

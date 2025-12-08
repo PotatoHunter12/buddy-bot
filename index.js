@@ -29,7 +29,7 @@ if (process.env.BETA == 1) {
   goodbyeChannelId = '1049440127480496160';
 } 
 
-const originalLog = console.log;
+const originalLog = console.log; 
 console.log = (...data) => {
     originalLog(...data); // still log to terminal
 
@@ -167,7 +167,7 @@ client.on('interactionCreate', async interaction => {
     console.log(`Command \`${interaction.commandName}\` executed`);
   } catch (error) {
     console.log(error);
-    await interaction.reply({ content: 'There was an error executing that command!', ephemeral: true });
+    await interaction.channel.send({ content: 'There was an error executing that command!', ephemeral: true });
   }
 });
 
