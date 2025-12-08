@@ -1,6 +1,6 @@
-const fetchWeeklyCounts = require('../utils/fetchWeeklyCounts'); 
+const fetchWeeklyCounts = require('./fetchWeeklyCounts'); 
 const { EmbedBuilder, ChannelType } = require('discord.js');
-const supabase = require('../utils/supabaseClient');
+const supabase = require('./supabaseClient');
 const QuickChart = require('quickchart-js');
 let threadsg;
 
@@ -167,7 +167,7 @@ async function createUserEmbed(userTotals, guild) {
       .setColor(0x5865F2)
       .setTimestamp();
 }
-async function recount(guild, interaction) {
+async function recount(guild) {
   const { error: deleteError } = await supabase
     .from('user_counts_week')
     .delete()
@@ -175,7 +175,6 @@ async function recount(guild, interaction) {
 
   if (deleteError) {
     console.log('Failed to clear user_counts_week table:', deleteError);
-    await interaction.editReply('Failed to clear previous data from database.');
     return;
   }
 
@@ -237,52 +236,49 @@ async function recount(guild, interaction) {
 
 }
 
-module.exports = {
-  name: 'log-weekly',
-  description: 'Count messages per user in every channel on this server this week',
-  async execute(interaction) {
-    await interaction.reply({content: 'Counting messages, please wait...', ephemeral: true});
-    const guild = interaction.guild;
+async function weeklyStats(client) {
+  const guild = await client.guilds.fetch(process.env.BETA == 0 ? "508432432312352780" : "939531690899034132");
+  const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160";
 
-    const out_id = process.env.BETA == 0 ? "1398262894638010388" : "1049440127480496160"; // 1049440127480496160
-    const output_channel = guild.channels.cache.get(out_id);
+  const output_channel = guild.channels.cache.get(out_id);
 
-    const graphData = await recount(guild, interaction);
+  const graphData = await recount(guild);
 
-    const { data, error } = await supabase
-      .from('user_counts_week')
-      .select('user_id, channel_id, msg_count, react_given, react_received')
-      .eq('guild_id', guild.id);
-    if (error) {
-      console.log('Supabase fetch error:', error);
-      await interaction.editReply('Failed to fetch message counts from the database.');
-      return;
-    }
+  const { data, error } = await supabase
+    .from('user_counts_week')
+    .select('user_id, channel_id, msg_count, react_given, react_received')
+    .eq('guild_id', guild.id);
+  if (error) {
+    console.log('Supabase fetch error:', error);
+    await interaction.editReply('Failed to fetch message counts from the database.');
+    return;
+  }
 
-    const userTotals = {};
-    const urgTotal = {};
-    const urrTotal = {};
-    const channelTotals = {};
-    
-    for (const row of data) {
-      userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
-      urgTotal[row.user_id] = (urgTotal[row.user_id] || 0) + row.react_given;
-      urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
+  const userTotals = {};
+  const urgTotal = {};
+  const urrTotal = {};
+  const channelTotals = {};
+  
+  for (const row of data) {
+    userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
+    urgTotal[row.user_id] = (urgTotal[row.user_id] || 0) + row.react_given;
+    urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
 
-      channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
-    }
+    channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
+  }
 
-    const userEmbed = await createUserEmbed(userTotals, guild);
-    const channelEmbed = await createChannelEmbed(channelTotals, guild);
-    const summaryEmbed = await createSummaryEmbed(userTotals, channelTotals);
-    const reactEmbed = await createReactEmbed(urgTotal, urrTotal);
-    const chartEmbed = await createChartEmbed(graphData);
+  const userEmbed = await createUserEmbed(userTotals, guild);
+  const channelEmbed = await createChannelEmbed(channelTotals, guild);
+  const summaryEmbed = await createSummaryEmbed(userTotals, channelTotals);
+  const reactEmbed = await createReactEmbed(urgTotal, urrTotal);
+  const chartEmbed = await createChartEmbed(graphData);
 
-    await output_channel.send({ content: null, embeds: [userEmbed] });
-    await output_channel.send({ content: null, embeds: [channelEmbed] });
-    await output_channel.send({ content: null, embeds: [summaryEmbed] });
-    await output_channel.send({ content: null, embeds: [reactEmbed] });
-    await output_channel.send({ content: null, embeds: [chartEmbed] });
+  await output_channel.send({ content: null, embeds: [userEmbed] });
+  await output_channel.send({ content: null, embeds: [channelEmbed] });
+  await output_channel.send({ content: null, embeds: [summaryEmbed] });
+  await output_channel.send({ content: null, embeds: [reactEmbed] });
+  await output_channel.send({ content: null, embeds: [chartEmbed] });
 
-  },
 };
+
+module.exports = weeklyStats;

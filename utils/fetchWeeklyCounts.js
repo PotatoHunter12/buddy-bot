@@ -9,7 +9,7 @@ async function fetchWeeklyCounts(channel) {
     let reactionReceived = {}; 
 
     try {
-    members = await channel.guild.members.fetch({ limit: 100 });
+        members = await channel.guild.members.fetch({ limit: 100 });
     } catch (err) {
         console.error(`Failed to fetch members for ${channel.guild.name}:`, err);
         return { counts: {}, daily: {}, /* ... */ };

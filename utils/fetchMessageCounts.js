@@ -1,6 +1,13 @@
 async function fetchMessageCounts(channel) {
     let counts = {};
-    let members = await channel.guild.members.fetch();
+    let members;
+
+    try {
+        members = await channel.guild.members.fetch({ limit: 100 });
+    } catch (err) {
+        console.error(`Failed to fetch members for ${channel.guild.name}:`, err);
+        return counts;
+    }
 
     async function countMessages(messageManager) {
         let lastId = null;

@@ -5,6 +5,7 @@ const { Client, Collection, GatewayIntentBits, EmbedBuilder, Partials } = requir
 const reactionRolesManager = require('./utils/reactionRolesManager');
 const { log } = require('console');
 const supabase = require('./utils/supabaseClient');
+const weeklyStats = require('./utils/weeklyStats');
 require('dotenv').config();
 
 const logChannelId = process.env.LOG_CHANNEL_ID;
@@ -76,17 +77,12 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('0 0 * * 0', () => {
-    console.log('Running weekly tasks...');
-    const weeklyLogCommand = client.commands.get('log-weekly');
-    if (weeklyLogCommand) {
-        const fakeInteraction = {
-            channel: null,
-            reply: async (content) => {
-                console.log('Weekly log executed');
-            }
-        };
-        weeklyLogCommand.execute(fakeInteraction);
+cron.schedule('0 0 * * 0', () => { // weekly: "0 0 * * 0" testing: "*/5 * * * *"
+    console.log('Running weekly stat log...');
+    try {
+        weeklyStats(client);
+    } catch (error) {
+        console.error('Error running weekly stat log:', error);
     }
 }, { timezone: 'CET' });
 
