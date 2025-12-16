@@ -1,6 +1,9 @@
+const { DateTime } = require('luxon');
+
 function parseTime(input) {
     input = input.trim();
     const now = new Date();
+    
 
     // Number only (minutes)
     if (/^\d+$/.test(input)) {
@@ -17,16 +20,18 @@ function parseTime(input) {
     // hh:mm
     if (/^(\d{1,2}):(\d{2})$/.test(input)) {
         const [, hour, minute] = input.match(/^(\d{1,2}):(\d{2})$/);
-        const target = new Date(now);
-        target.setHours(parseInt(hour), parseInt(minute), 0, 0);
-        if (target < now) target.setDate(target.getDate() + 1); // tomorrow if past
-        return target;
+        const nowDt = DateTime.now().setZone("Europe/Ljubljana");
+        let target = nowDt.set({hour, minute, second: 0, millisecond: 0});
+
+        if (target <= nowDt) target = target.plus({days: 1}); // tomorrow if past
+        return target.toUTC().toJSDate();
     }
 
     // hh:mm dd.mm.yyyy
     if (/^(\d{1,2}):(\d{2}) (\d{1,2})\.(\d{1,2})\.(\d{4})$/.test(input)) {
         const [, hour, minute, day, month, year] = input.match(/^(\d{1,2}):(\d{2}) (\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-        return new Date(year, month - 1, day, hour, minute, 0, 0);
+        const dt = DateTime.fromObject({year, month, day, hour, minute},{ zone: 'Europe/Ljubljana' });
+        return dt.toUTC().toJSDate();
     }
 
     return null;
@@ -48,6 +53,7 @@ module.exports = {
 
     const ms = targetDate.getTime() - Date.now();
     await interaction.reply({ content: `⏰ Reminder set for <t:${Math.floor(targetDate.getTime()/1000)}:F>.`, ephemeral: true });
+
 
     setTimeout(async () => {
         if (dm) {
