@@ -136,7 +136,7 @@ cron.schedule('* * * * *', () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
-    if (process.env.BETA == 1) return; 
+    // if (process.env.BETA == 1) return; 
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
@@ -146,6 +146,16 @@ client.on("messageCreate", async (message) => {
         
         message.channel.send(aaa); 
     }
+
+    // Emoji reaction on keyword
+    if (message.content.toLowerCase().includes('metropol')) {
+        try {
+            await message.react('<:word_of_the_week:1466446491697807495>');// custom emoji ID
+        } catch (error) {
+            console.log(`Failed to react with emoji: ${error}`);
+        }
+    }
+
     // if (message.author.id === '344080041501786115') {
     //     const mockMessage = mock(message.content);
     //     message.channel.send(mockMessage);
