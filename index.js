@@ -118,25 +118,23 @@ cron.schedule('* * * * *', () => {
   });
 });
 
-// cron.schedule('* * * * *', () => {
-//     const testCmd = client.commands.get('help');
-    
-//     if (logChannel) {
-//         const fakeInteraction = {
-//             channel: logChannel,
-//             reply: async (content) => {
-//                 logChannel.send(content);
-//                 console.log("test command executed");
-                
-//             }
-//         };
-//         testCmd.execute(fakeInteraction);
-//     }
-// });
+cron.schedule('20 * * * *', () => {
+    // send embed to channel 1049440127480496160
+    const channel = client.channels.cache.get('1049440127480496160');
+    if (!channel) return;
+
+    const embed = new EmbedBuilder()
+        .setTitle('Secret Word of the Week was `metropola`!')
+        .setDescription('Nobody guessed the word :(')
+        .setColor(0x00FF00)
+        .setTimestamp();
+    channel.send({ embeds: [embed] });
+    console.log('Sent secret word of the week embed');
+});
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
-    // if (process.env.BETA == 1) return; 
+    if (process.env.BETA == 1) return; 
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
