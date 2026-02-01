@@ -118,19 +118,19 @@ cron.schedule('* * * * *', () => {
   });
 });
 
-cron.schedule('21 * * * *', () => {
-    // send embed to channel 1049440127480496160
-    const channel = client.channels.cache.get('1398262894638010388');
-    if (!channel) return;
+// cron.schedule('21 * * * *', () => {
+//     // send embed to channel 1049440127480496160
+//     const channel = client.channels.cache.get('1049440127480496160');
+//     if (!channel) return;
 
-    const embed = new EmbedBuilder()
-        .setTitle('Secret Word of the Week was `metropola`!')
-        .setDescription('Nobody guessed the word :(')
-        .setColor(0x00FF00)
-        .setTimestamp();
-    channel.send({ embeds: [embed] });
-    console.log('Sent secret word of the week embed');
-});
+//     const embed = new EmbedBuilder()
+//         .setTitle('Secret Word of the Week was `metropola`!')
+//         .setDescription('Nobody guessed the word :(')
+//         .setColor(0x00FF00)
+//         .setTimestamp();
+//     channel.send({ embeds: [embed] });
+//     console.log('Sent secret word of the week embed');
+// });
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -146,9 +146,10 @@ client.on("messageCreate", async (message) => {
     }
 
     // Emoji reaction on keyword
-    if (message.content.toLowerCase().includes('metropol')) {
+    if (message.content.toLowerCase().includes('diplom')) {
         try {
             await message.react('<:word_of_the_week:1466446491697807495>');// custom emoji ID
+            log(`${message.author.username} triggered word of the week reaction.`);
         } catch (error) {
             console.log(`Failed to react with emoji: ${error}`);
         }
