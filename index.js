@@ -118,9 +118,9 @@ cron.schedule('* * * * *', () => {
   });
 });
 
-cron.schedule('20 * * * *', () => {
+cron.schedule('21 * * * *', () => {
     // send embed to channel 1049440127480496160
-    const channel = client.channels.cache.get('1049440127480496160');
+    const channel = client.channels.cache.get('1398262894638010388');
     if (!channel) return;
 
     const embed = new EmbedBuilder()
