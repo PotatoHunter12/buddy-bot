@@ -25,6 +25,8 @@ const client = new Client({
 let welcomeChannelId = '508577166007730186';
 let goodbyeChannelId = '1009115321388515403';
 
+let secretWord = true;
+
 if (process.env.BETA == 1) {
   welcomeChannelId = '1049440127480496160';
   goodbyeChannelId = '1049440127480496160';
@@ -146,13 +148,16 @@ client.on("messageCreate", async (message) => {
     }
 
     // Emoji reaction on keyword
-    if (message.content.toLowerCase().includes('diplom')) {
-        try {
-            await message.react('<:word_of_the_week:1466446491697807495>');// custom emoji ID
-            log(`${message.author.username} triggered word of the week reaction.`);
-        } catch (error) {
-            console.log(`Failed to react with emoji: ${error}`);
-        }
+    if(secretWord) {
+      if (message.content.toLowerCase().includes('ratecards')) {
+          try {
+              await message.react('<:word_of_the_week:1466446491697807495>');// custom emoji ID
+              console.log(`${message.author.username} triggered word of the week reaction.`);
+              secretWord = false; // reset secret word
+          } catch (error) {
+              console.log(`Failed to react with emoji: ${error}`);
+          }
+      }
     }
 
     // if (message.author.id === '344080041501786115') {
