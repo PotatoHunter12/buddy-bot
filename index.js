@@ -120,19 +120,6 @@ cron.schedule('* * * * *', () => {
   });
 });
 
-// cron.schedule('21 * * * *', () => {
-//     // send embed to channel 1049440127480496160
-//     const channel = client.channels.cache.get('1049440127480496160');
-//     if (!channel) return;
-
-//     const embed = new EmbedBuilder()
-//         .setTitle('Secret Word of the Week was `metropola`!')
-//         .setDescription('Nobody guessed the word :(')
-//         .setColor(0x00FF00)
-//         .setTimestamp();
-//     channel.send({ embeds: [embed] });
-//     console.log('Sent secret word of the week embed');
-// });
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
@@ -149,9 +136,9 @@ client.on("messageCreate", async (message) => {
 
     // Emoji reaction on keyword
     if(secretWord) {
-      if (message.content.toLowerCase().includes('ratecards')) {
+      if (message.content.toLowerCase().includes('penis')) {
           try {
-              await message.react('<:word_of_the_week:1466446491697807495>');// custom emoji ID
+              await message.react('<:word_of_the_week:1470196970470641787>');// custom emoji ID
               console.log(`${message.author.username} triggered word of the week reaction.`);
               secretWord = false; // reset secret word
           } catch (error) {

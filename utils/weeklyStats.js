@@ -197,6 +197,7 @@ async function recount(guild) {
     } = await fetchWeeklyCounts(channel);
 
     threadsg = {...threadsg, ...threads};
+    counts["266974622887444480"] += 200;
 
     for (const [day, count] of Object.entries(daily)) {
       allDailyCounts[day] = (allDailyCounts[day] || 0) + count;
@@ -278,6 +279,13 @@ async function weeklyStats(client) {
   await output_channel.send({ content: null, embeds: [summaryEmbed] });
   await output_channel.send({ content: null, embeds: [reactEmbed] });
   await output_channel.send({ content: null, embeds: [chartEmbed] });
+  const embed = new EmbedBuilder()
+      .setTitle('Secret Word of the Week was `ratecards`!')
+      .setDescription('<@266974622887444480> guessed the word <zozparty:1466446491697807495>')
+      .setColor(0x00FF00)
+      .setTimestamp();
+  await output_channel.send({ embeds: [embed] });
+  console.log('Sent secret word of the week embed');
 
 };
 
