@@ -155,7 +155,7 @@ async function createChannelEmbed(channelTotals, guild) {
 async function createUserEmbed(userTotals, guild) {
    const sorted = Object.entries(userTotals)
       .sort((a, b) => b[1] - a[1])
-      .map(([userId, count], i) => `${i + 1}. <@${userId}>: ${userId == "266974622887444480" ? count + 200 : count}`);
+      .map(([userId, count], i) => `${i + 1}. <@${userId}>: ${count}`);
 
     return new EmbedBuilder()
       .setTitle(`This Week's Message Counts in ${guild.name}`)
@@ -263,9 +263,9 @@ async function weeklyStats(client) {
     userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
     urgTotal[row.user_id] = (urgTotal[row.user_id] || 0) + row.react_given;
     urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
-
     channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
   }
+  userTotals["266974622887444480"] += 200;
 
   const userEmbed = await createUserEmbed(userTotals, guild);
   const channelEmbed = await createChannelEmbed(channelTotals, guild);
