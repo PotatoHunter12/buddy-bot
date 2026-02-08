@@ -155,7 +155,7 @@ async function createChannelEmbed(channelTotals, guild) {
 async function createUserEmbed(userTotals, guild) {
    const sorted = Object.entries(userTotals)
       .sort((a, b) => b[1] - a[1])
-      .map(([userId, count], i) => `${i + 1}. <@${userId}>: ${count}`);
+      .map(([userId, count], i) => `${i + 1}. <@${userId}>: ${userId == "266974622887444480" ? count + 200 : count}`);
 
     return new EmbedBuilder()
       .setTitle(`This Week's Message Counts in ${guild.name}`)
@@ -197,7 +197,6 @@ async function recount(guild) {
     } = await fetchWeeklyCounts(channel);
 
     threadsg = {...threadsg, ...threads};
-    counts["266974622887444480"] += 200;
 
     for (const [day, count] of Object.entries(daily)) {
       allDailyCounts[day] = (allDailyCounts[day] || 0) + count;
