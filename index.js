@@ -79,7 +79,7 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('47 0 * * 1', () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
+cron.schedule('0 0 * * 1', () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
     console.log('Running weekly stat log...');
     try {
         weeklyStats(client);
@@ -136,7 +136,7 @@ client.on("messageCreate", async (message) => {
 
     // Emoji reaction on keyword
     if(secretWord) {
-      if (message.content.toLowerCase().includes('penis')) {
+      if (message.content.toLowerCase().includes('burek')) {
           try {
               await message.react('<:word_of_the_week:1470196970470641787>');// custom emoji ID
               console.log(`${message.author.username} triggered word of the week reaction.`);
