@@ -2,6 +2,7 @@ const fetchWeeklyCounts = require('./fetchWeeklyCounts');
 const { EmbedBuilder, ChannelType } = require('discord.js');
 const supabase = require('./supabaseClient');
 const QuickChart = require('quickchart-js');
+const fs = require('fs');
 let threadsg;
 
 async function createChartEmbed(graphData){
@@ -258,6 +259,8 @@ async function weeklyStats(client) {
   const urgTotal = {};
   const urrTotal = {};
   const channelTotals = {};
+
+  const secret = JSON.parse(fs.readFileSync('./secret.json', 'utf8'));
   
   for (const row of data) {
     userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
@@ -265,7 +268,7 @@ async function weeklyStats(client) {
     urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
     channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
   }
-  userTotals["344043200089948160"] += 200;
+  userTotals[secret.triggeredBy] += 200;
 
   const userEmbed = await createUserEmbed(userTotals, guild);
   const channelEmbed = await createChannelEmbed(channelTotals, guild);
@@ -278,13 +281,14 @@ async function weeklyStats(client) {
   await output_channel.send({ content: null, embeds: [summaryEmbed] });
   await output_channel.send({ content: null, embeds: [reactEmbed] });
   await output_channel.send({ content: null, embeds: [chartEmbed] });
+  
+  
   const embed = new EmbedBuilder()
-      .setTitle('Secret Word of the Week was `penis`!')
-      .setDescription('<@344043200089948160> guessed the word <a:zozparty:1466446491697807495>')
+      .setTitle(`Secret Word of the Week was \`${eval(secret.word)}\`!`)
+      .setDescription(`<@${secret.triggeredBy}> guessed the word <a:zozparty:1466446491697807495>`)
       .setColor(0x00FF00)
       .setTimestamp();
   await output_channel.send({ embeds: [embed] });
-  console.log('Sent secret word of the week embed');
 
 };
 
