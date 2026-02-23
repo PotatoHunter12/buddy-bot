@@ -1,0 +1,6 @@
+{
+  "watch": ["*.*"],
+  "ignore": ["secret.json", "node_modules/**"],
+  "ext": ["js","mjs","cjs","json"],
+  "legacy-watch": true
+}

@@ -25,7 +25,7 @@ const client = new Client({
 let welcomeChannelId = '508577166007730186';
 let goodbyeChannelId = '1009115321388515403';
 
-let secret = JSON.parse(fs.readFileSync('./secret.json', 'utf8'));
+let secret = JSON.parse(fs.readFileSync('secret.json', 'utf8'));
 
 if (process.env.BETA == 1) {
   welcomeChannelId = '1049440127480496160';
@@ -80,16 +80,16 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('0 0 * * 1', () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
+cron.schedule('15 2 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
     console.log('Running weekly stat log...');
     try {
-        weeklyStats(client);
+        await weeklyStats(client);
     } catch (error) {
         console.error('Error running weekly stat log:', error);
     }
     resetSecret();
-    
-}, { timezone: 'CET' });
+
+}, { timezone: 'CET' }); 
 
 cron.schedule('0 0 * * 3', () => {
   supabase.from('user_counts').select('*').limit(1).then(() => {
@@ -126,7 +126,7 @@ cron.schedule('* * * * *', () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
-    // if (process.env.BETA == 1) return; 
+    // if (process.env.BETA == 1) return;
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
@@ -140,6 +140,8 @@ client.on("messageCreate", async (message) => {
     // Emoji reaction on keyword
     if(secret.active) {
       const secretWord = eval(secret.word);
+
+      console.log("word is"+secretWord);
       if (message.content.toLowerCase().includes(secretWord)) {
           try {
               await message.react('<:word_of_the_week:1470196970470641787>');// custom emoji ID
@@ -149,13 +151,14 @@ client.on("messageCreate", async (message) => {
               secret.active = false;
               secret.triggeredBy = message.author.id;
               secret.triggeredAt = new Date().toISOString();
+              secret.wordFound = secretWord;
               secret.history.push({
                   userId: message.author.id,
                   username: message.author.username,
                   triggeredAt: new Date().toISOString(),
                   word: secretWord
               });
-              fs.writeFileSync('./secret.json', JSON.stringify(secret, null, 2));
+              fs.writeFileSync('secret.json', JSON.stringify(secret, null, 2));
           } catch (error) {
               console.log(`Failed to react with emoji: ${error}`);
           }
@@ -242,5 +245,6 @@ const resetSecret = () => {
   secret.active = true;
   secret.triggeredBy = null;
   secret.triggeredAt = null;
-  fs.writeFileSync('./secret.json', JSON.stringify(secret, null, 2));
+  secret.wordFound = null;
+  fs.writeFileSync('secret.json', JSON.stringify(secret, null, 2));
 }
