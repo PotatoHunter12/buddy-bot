@@ -80,7 +80,7 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('15 2 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
+cron.schedule('17 2 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
     console.log('Running weekly stat log...');
     try {
         await weeklyStats(client);
