@@ -80,7 +80,7 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('17 2 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
+cron.schedule('0 0 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
     console.log('Running weekly stat log...');
     try {
         await weeklyStats(client);
@@ -140,8 +140,7 @@ client.on("messageCreate", async (message) => {
     // Emoji reaction on keyword
     if(secret.active) {
       const secretWord = eval(secret.word);
-
-      console.log("word is"+secretWord);
+      
       if (message.content.toLowerCase().includes(secretWord)) {
           try {
               await message.react('<:word_of_the_week:1470196970470641787>');// custom emoji ID
