@@ -49,16 +49,18 @@ for (const file of commandFiles) {
 }
 
 client.login(process.env.DISCORD_TOKEN)
-    .then(() => console.log('Buddy Bot is online!'))
+    .then(() => console.log('Login successful!'))
     .catch(err => console.error('Failed to login:', err));
     
  
 client.once('ready', async () => {
+    console.log("Buddy Bot is online!");
     console.log(`Bot is ready in ${client.guilds.cache.size} guilds.`);
+    console.log(`Secret is ${secret.active ? "active" : "not active"}`);
+    
     for (const guild of client.guilds.cache.values()) {
       try {
         await guild.members.fetch();
-        console.log(`Cached members for ${guild.name}`);
       } catch (err) {
         console.warn(`Failed to cache members for ${guild.name}:`, err.message);
       }
@@ -126,7 +128,7 @@ cron.schedule('* * * * *', () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
-    // if (process.env.BETA == 1) return;
+    if (process.env.BETA == 1) return;
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
@@ -135,6 +137,16 @@ client.on("messageCreate", async (message) => {
         const aaa = (isUpper ? a.toUpperCase() : a).repeat(len);
         
         message.channel.send(aaa); 
+    }
+    const reg = /pir|piv[aeiou]|per/i;
+    if (reg.test(message.content)) {
+        try {
+            await message.react('🍺');
+            console.log(`Beer mentioned in ${message.channel.name}!`);
+            
+        } catch (error) {
+            console.log(`Failed to react with beer emoji: ${error}`);
+        }
     }
 
     // Emoji reaction on keyword
