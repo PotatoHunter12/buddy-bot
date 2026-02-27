@@ -138,7 +138,7 @@ client.on("messageCreate", async (message) => {
         
         message.channel.send(aaa); 
     }
-    const reg = /pir|piv[aeiou]|per/i;
+    const reg = /pir|piv[aeiou]|beer|per/i;
     if (reg.test(message.content)) {
         try {
             await message.react('🍺');
