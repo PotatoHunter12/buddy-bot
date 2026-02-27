@@ -26,6 +26,7 @@ let welcomeChannelId = '508577166007730186';
 let goodbyeChannelId = '1009115321388515403';
 
 let secret = JSON.parse(fs.readFileSync('secret.json', 'utf8'));
+let stats = JSON.parse(fs.readFileSync('stats.json', 'utf8'));
 
 if (process.env.BETA == 1) {
   welcomeChannelId = '1049440127480496160';
@@ -128,7 +129,7 @@ cron.schedule('* * * * *', () => {
 
 client.on("messageCreate", async (message) => {
     if (message.author.bot) return;
-    if (process.env.BETA == 1) return;
+    // if (process.env.BETA == 1) return;
 
     if (message.content.toLowerCase() === 'aaa') {
         const a = Math.floor(Math.random() * 10000) > 1 ? "a":"b";
@@ -143,7 +144,8 @@ client.on("messageCreate", async (message) => {
         try {
             await message.react('🍺');
             console.log(`Beer mentioned in ${message.channel.name}!`);
-            
+            stats.beer += 1;
+            fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
         } catch (error) {
             console.log(`Failed to react with beer emoji: ${error}`);
         }

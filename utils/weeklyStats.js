@@ -77,6 +77,9 @@ async function createSummaryEmbed(userTotals, channelTotals) {
     const [topChannelId, topChannelCount] = Object.entries(channelTotals)
       .sort((a, b) => b[1] - a[1])[0] || [null, null];
 
+    // Beer mention count
+    const beerCount = stats.beer || 0;
+
   return new EmbedBuilder()
     .setTitle(`This Week's Server Activity Summary`)
     .addFields(
@@ -89,12 +92,17 @@ async function createSummaryEmbed(userTotals, channelTotals) {
         name: 'Most Active Channel',
         value: topChannelId ? `<#${topChannelId}>: ${topChannelCount} messages` : 'No active channels this week.',
         inline: false,
+    },{
+        name: 'Beer Counter',
+        value: `**Beer mentioned** ${beerCount} times.`,
+        inline: false,
     },
     {
         name: 'Total Messages',
         value: `**${totalMessages}** messages this week.`,
         inline: false,
-    })
+    }
+    )
     .setColor(0x00B0F4)
     .setTimestamp();
 }
