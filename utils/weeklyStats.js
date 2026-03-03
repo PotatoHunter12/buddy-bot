@@ -63,6 +63,7 @@ async function createChartEmbed(graphData){
 }
 async function createSummaryEmbed(userTotals, channelTotals) {
     const totalMessages = Object.values(userTotals).reduce((sum, count) => sum + count, 0);
+    const stats = JSON.parse(fs.readFileSync('stats.json', 'utf8'));
 
     // Get top 3 users
     const topUsers = Object.entries(userTotals)

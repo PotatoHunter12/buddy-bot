@@ -57,7 +57,7 @@ client.login(process.env.DISCORD_TOKEN)
 client.once('ready', async () => {
     console.log("Buddy Bot is online!");
     console.log(`Bot is ready in ${client.guilds.cache.size} guilds.`);
-    console.log(`Secret is ${secret.active ? "active" : "not active"}`);
+    console.log(`Secret is ${secret.active ? eval(secret.word) : "not active"}`);
     
     for (const guild of client.guilds.cache.values()) {
       try {
@@ -153,9 +153,9 @@ client.on("messageCreate", async (message) => {
 
     // Emoji reaction on keyword
     if(secret.active) {
-      const secretWord = eval(secret.word);
+      const secretWord = new RegExp(process.env.SECRET_WORD, 'i');
       
-      if (message.content.toLowerCase().includes(secretWord)) {
+      if (secretWord.test(message.content)) {
           try {
               await message.react('<:word_of_the_week:1470196970470641787>');// custom emoji ID
               console.log(`${message.author.username} triggered word of the week reaction.`);
@@ -164,12 +164,12 @@ client.on("messageCreate", async (message) => {
               secret.active = false;
               secret.triggeredBy = message.author.id;
               secret.triggeredAt = new Date().toISOString();
-              secret.wordFound = secretWord;
+              secret.wordFound = message.content.match(secretWord)[0];
               secret.history.push({
                   userId: message.author.id,
                   username: message.author.username,
                   triggeredAt: new Date().toISOString(),
-                  word: secretWord
+                  word: message.content.match(secretWord)[0]
               });
               fs.writeFileSync('secret.json', JSON.stringify(secret, null, 2));
           } catch (error) {
