@@ -143,7 +143,7 @@ client.on("messageCreate", async (message) => {
     if (reg.test(message.content)) {
         try {
             await message.react('🍺');
-            console.log(`Beer mentioned in ${message.channel.name}!`);
+            console.log(`Beer mentioned in ${message.channel.name}! ${stats.beer + 1} times total.`);
             stats.beer += 1;
             fs.writeFileSync('stats.json', JSON.stringify(stats, null, 2));
         } catch (error) {
