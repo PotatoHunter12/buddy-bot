@@ -278,7 +278,7 @@ async function weeklyStats(client) {
     channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
   }
   if ( secret.triggeredBy) {
-    userTotals[secret.triggeredBy] += 200;
+    userTotals[secret.triggeredBy] += 250;
   }
 
   const userEmbed = await createUserEmbed(userTotals, guild);
