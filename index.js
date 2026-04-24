@@ -57,7 +57,7 @@ client.login(process.env.DISCORD_TOKEN)
 client.once('ready', async () => {
     console.log("Buddy Bot is online!");
     console.log(`Bot is ready in ${client.guilds.cache.size} guilds.`);
-    console.log(`Secret is ${secret.active ? eval(secret.word) : "not active"}`);
+    console.log(`Secret is ${secret.active ? "active" : "not active"}`);
     
     for (const guild of client.guilds.cache.values()) {
       try {
@@ -83,7 +83,7 @@ client.on('guildMemberAdd', async member => {
     }
 });
 
-cron.schedule('48 0 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
+cron.schedule('0 0 * * 1', async () => { // weekly: "0 0 * * 1" testing: "*/5 * * * *"
     console.log('Running weekly stat log...');
     try {
         await weeklyStats(client);

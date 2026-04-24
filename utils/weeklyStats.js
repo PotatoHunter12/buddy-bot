@@ -275,10 +275,10 @@ async function weeklyStats(client) {
     userTotals[row.user_id] = (userTotals[row.user_id] || 0) + row.msg_count;
     urgTotal[row.user_id] = (urgTotal[row.user_id] || 0) + row.react_given;
     urrTotal[row.user_id] = (urrTotal[row.user_id] || 0) + row.react_received;
-    channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;
+    channelTotals[row.channel_id] = (channelTotals[row.channel_id] || 0) + row.msg_count;   
   }
   if ( secret.triggeredBy) {
-    userTotals[secret.triggeredBy] += 250;
+    userTotals[secret.triggeredBy] += 200;
   }
 
   const userEmbed = await createUserEmbed(userTotals, guild);
